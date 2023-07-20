@@ -3,21 +3,17 @@ import cv2
 
 
 class PoseTracker:
-    def __init__(self, indexes_to_track=[]):
-        self.mode = False
-        self.smooth = True
-        self.detection_confidence = 0.5
-        self.track_confidence = 0.5
-        self.indexes_to_track = indexes_to_track
+    def __init__(self, landmarks_to_track=[]):
+        self.landmarks_to_track = landmarks_to_track
         self.landmarks_list = []
         self.results = []
 
         self.mp_draw = mp.solutions.drawing_utils
         self.mp_pose = mp.solutions.pose
-        self.pose = self.mp_pose.Pose(static_image_mode=self.mode,
-                                      smooth_landmarks=self.smooth,
-                                      min_detection_confidence=self.detection_confidence,
-                                      min_tracking_confidence=self.track_confidence)
+        self.pose = self.mp_pose.Pose(min_detection_confidence=0.5,
+                                      min_tracking_confidence=0.5,
+                                      smooth_landmarks=True,
+                                      static_image_mode=False)
 
     def find_position(self, img, draw=True):
         imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -33,8 +29,8 @@ class PoseTracker:
         self.landmarks_list = []
         if self.results.pose_world_landmarks:
             for index, lm in enumerate(self.results.pose_world_landmarks.landmark):
-                if index in self.indexes_to_track:
-                    cx, cy, cz = round(lm.x, 2), (-1) * round(lm.y, 2), round(lm.z, 2)
-                    self.landmarks_list.extend([cx, cy, cz])
+                if index in self.landmarks_to_track:
+                    cx, cy = (-1) * round(lm.x, 2), (-1) * round(lm.y, 2)
+                    self.landmarks_list.extend([cx, cy])
 
         return self.landmarks_list
